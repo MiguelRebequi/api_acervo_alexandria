@@ -31,24 +31,12 @@ public class Usuario {
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     private Credencial credencial;
 
-    public List<Pedido> getPedidos() {
-        return pedidos;
-    }
-
-    public void setPedidos(List<Pedido> pedidos) {
-        this.pedidos = pedidos;
-    }
+    private List<Carrinho> itensCarrinho = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario")
     private List<Pedido> pedidos = new ArrayList<>();
 
-    public Credencial getCredencial() {
-        return credencial;
-    }
 
-    public void setCredencial(Credencial credencial) {
-        this.credencial = credencial;
-    }
 
     public Usuario() {}
 
@@ -104,5 +92,29 @@ public class Usuario {
 
     public void setTelefoneMovel(String telefoneMovel) {
         this.telefoneMovel = telefoneMovel;
+    }
+
+    public Credencial getCredencial() {
+        return credencial;
+    }
+
+    public void setCredencial(Credencial credencial) {
+        this.credencial = credencial;
+    }
+
+    public List<Pedido> getPedidos() {
+        return pedidos;
+    }
+
+    public void setPedidos(List<Pedido> pedidos) {
+        this.pedidos = pedidos;
+    }
+
+    public List<Carrinho> getItensCarrinho() {
+        return itensCarrinho;
+    }
+
+    public void setItensCarrinho(List<Carrinho> itensCarrinho) {
+        this.itensCarrinho = itensCarrinho;
     }
 }
