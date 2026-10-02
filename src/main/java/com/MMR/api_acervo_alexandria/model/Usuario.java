@@ -28,6 +28,9 @@ public class Usuario {
     @Column(length = 20)
     private String telefoneMovel;
 
+    @Column(unique = true, nullable = false, length = 11)
+    private String cpf;
+
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     private Credencial credencial;
 
