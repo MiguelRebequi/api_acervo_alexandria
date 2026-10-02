@@ -1,4 +1,4 @@
-package com.GMR.api_acervo_alexandria;
+package com.MMR.api_acervo_alexandria;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
