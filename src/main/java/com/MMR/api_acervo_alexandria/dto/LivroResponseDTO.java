@@ -1,9 +1,11 @@
 package com.MMR.api_acervo_alexandria.dto;
 
+import java.math.BigDecimal;
+
 public record LivroResponseDTO(Long id,
                                String titulo,
                                String autor,
                                String isbn,
-                               Double preco,
+                               BigDecimal preco,
                                Integer quantidadeEstoque) {
 }
