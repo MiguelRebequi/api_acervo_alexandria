@@ -39,7 +39,8 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario")
     private List<Pedido> pedidos = new ArrayList<>();
 
-
+    @Column(nullable = false)
+    private Boolean ativo = true; // Todo Registro de Usuário já nasce ativo por padrão
 
     public Usuario() {}
 
@@ -119,5 +120,21 @@ public class Usuario {
 
     public void setItensCarrinho(List<Carrinho> itensCarrinho) {
         this.itensCarrinho = itensCarrinho;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
 }

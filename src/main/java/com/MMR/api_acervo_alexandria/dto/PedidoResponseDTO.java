@@ -1,5 +1,6 @@
 package com.MMR.api_acervo_alexandria.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -8,7 +9,7 @@ public record PedidoResponseDTO(
         String nomeCliente,
         LocalDateTime dataRealizacao,
         String status,
-        Double valorTotal,
+        BigDecimal valorTotal,
         List<ItemPedidoResponseDTO> itensPedido
 ) {
 }
