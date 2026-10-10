@@ -47,7 +47,7 @@ public class PedidoService {
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
         pedido.setDataPedido(LocalDateTime.now());
-        pedido.setStatus("PROCESSANDO");
+        pedido.setStatus(StatusPedido.PROCESSANDO);
 
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         List<ItemPedidoResponseDTO> itensResponse = new ArrayList<>();
@@ -120,7 +120,7 @@ public class PedidoService {
     }
 
     @Transactional
-    public PedidoResponseDTO atualizarStatus(Long pedidoId, String novoStatus) {
+    public PedidoResponseDTO atualizarStatus(Long pedidoId, StatusPedido novoStatus) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
 

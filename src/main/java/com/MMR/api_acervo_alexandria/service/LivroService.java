@@ -5,10 +5,10 @@ import com.MMR.api_acervo_alexandria.dto.LivroResponseDTO;
 import com.MMR.api_acervo_alexandria.model.Livro;
 import com.MMR.api_acervo_alexandria.repository.LivroRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LivroService {
@@ -41,13 +41,12 @@ public class LivroService {
 
 
     }
-    public List<LivroResponseDTO> listarTodos() {
-        return livroRepository.findByAtivoTrue().stream()
+    public Page<LivroResponseDTO> listarTodos(Pageable pageable) {
+        return livroRepository.findByAtivoTrue(pageable)
                 .map(livro -> new LivroResponseDTO(
                         livro.getId(), livro.getTitulo(), livro.getAutor(),
                         livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque()
-                ))
-                .collect(Collectors.toList());
+                ));
     }
 
     public LivroResponseDTO buscarPorId(Long id) {
@@ -58,6 +57,24 @@ public class LivroService {
                 livro.getId(), livro.getTitulo(), livro.getAutor(),
                 livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque()
         );
+    }
+
+    public LivroResponseDTO buscarPorIsbn(String isbn) {
+        Livro livro = livroRepository.findByIsbnAndAtivoTrue(isbn)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado para o ISBN: " + isbn));
+
+        return new LivroResponseDTO(
+                livro.getId(), livro.getTitulo(), livro.getAutor(),
+                livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque()
+        );
+    }
+
+    public Page<LivroResponseDTO> buscarPorTitulo(String titulo, Pageable pageable) {
+        return livroRepository.findByTituloContainingIgnoreCaseAndAtivoTrue(titulo, pageable)
+                .map(livro -> new LivroResponseDTO(
+                        livro.getId(), livro.getTitulo(), livro.getAutor(),
+                        livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque()
+                ));
     }
 
     @Transactional

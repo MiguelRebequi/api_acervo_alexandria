@@ -18,8 +18,9 @@ public class Pedido {
     @Column(nullable = false)
     private LocalDateTime dataPedido;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
-    private String status;
+    private StatusPedido status;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valorTotal;
@@ -50,7 +51,7 @@ public class Pedido {
     public  Pedido() {
     }
 
-    public Pedido(LocalDateTime dataPedido, String status, BigDecimal valorTotal) {
+    public Pedido(LocalDateTime dataPedido, StatusPedido status, BigDecimal valorTotal) {
         this.dataPedido = dataPedido;
         this.status = status;
         this.valorTotal = valorTotal;
@@ -72,11 +73,11 @@ public class Pedido {
         this.dataPedido = dataPedido;
     }
 
-    public String getStatus() {
+    public StatusPedido getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusPedido status) {
         this.status = status;
     }
 
