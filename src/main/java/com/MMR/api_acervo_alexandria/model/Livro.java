@@ -26,17 +26,21 @@ public class Livro {
     @Column(nullable = false)
     private Integer quantidadeEstoque;
 
+    @Column(name = "ano_publicacao", nullable = false)
+    private Integer anoPublicacao;
+
     @Column(nullable = false)
     private Boolean ativo = true; // Todo registro de Livro já nasce ativo por padrão
 
     public Livro() {}
 
-    public Livro(String titulo, String autor, String isbn, BigDecimal preco, Integer quantidadeEstoque) {
+    public Livro(String titulo, String autor, String isbn, BigDecimal preco, Integer quantidadeEstoque, Integer anoPublicacao) {
         this.titulo = titulo;
         this.autor = autor;
         this.isbn = isbn;
         this.preco = preco;
         this.quantidadeEstoque = quantidadeEstoque;
+        this.anoPublicacao = anoPublicacao;
     }
 
     public Long getId() {
@@ -93,5 +97,13 @@ public class Livro {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public Integer getAnoPublicacao() {
+        return anoPublicacao;
+    }
+
+    public void setAnoPublicacao(Integer anoPublicacao) {
+        this.anoPublicacao = anoPublicacao;
     }
 }

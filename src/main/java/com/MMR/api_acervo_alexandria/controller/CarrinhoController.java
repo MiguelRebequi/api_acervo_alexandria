@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/carrinho")
+@RequestMapping("/carrinhos")
 public class CarrinhoController {
     private final CarrinhoService carrinhoService;
 

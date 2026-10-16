@@ -31,12 +31,13 @@ public class LivroService {
         livro.setIsbn(dto.isbn());
         livro.setPreco(dto.preco());
         livro.setQuantidadeEstoque(dto.quantidadeEstoque());
+        livro.setAnoPublicacao(dto.anoPublicacao());
 
         Livro salvo = livroRepository.save(livro);
 
         return new LivroResponseDTO(
                 salvo.getId(), salvo.getTitulo(), salvo.getAutor(),
-                salvo.getIsbn(), salvo.getPreco(), salvo.getQuantidadeEstoque()
+                salvo.getIsbn(), salvo.getPreco(), salvo.getQuantidadeEstoque(), salvo.getAnoPublicacao()
         );
 
 
@@ -45,7 +46,7 @@ public class LivroService {
         return livroRepository.findByAtivoTrue(pageable)
                 .map(livro -> new LivroResponseDTO(
                         livro.getId(), livro.getTitulo(), livro.getAutor(),
-                        livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque()
+                        livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque(), livro.getAnoPublicacao()
                 ));
     }
 
@@ -55,7 +56,7 @@ public class LivroService {
 
         return new LivroResponseDTO(
                 livro.getId(), livro.getTitulo(), livro.getAutor(),
-                livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque()
+                livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque(), livro.getAnoPublicacao()
         );
     }
 
@@ -65,7 +66,7 @@ public class LivroService {
 
         return new LivroResponseDTO(
                 livro.getId(), livro.getTitulo(), livro.getAutor(),
-                livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque()
+                livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque(), livro.getAnoPublicacao()
         );
     }
 
@@ -73,7 +74,7 @@ public class LivroService {
         return livroRepository.findByTituloContainingIgnoreCaseAndAtivoTrue(titulo, pageable)
                 .map(livro -> new LivroResponseDTO(
                         livro.getId(), livro.getTitulo(), livro.getAutor(),
-                        livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque()
+                        livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque(),  livro.getAnoPublicacao()
                 ));
     }
 
@@ -92,12 +93,13 @@ public class LivroService {
         livro.setIsbn(dto.isbn());
         livro.setPreco(dto.preco());
         livro.setQuantidadeEstoque(dto.quantidadeEstoque());
+        livro.setAnoPublicacao(dto.anoPublicacao());
 
         Livro salvo = livroRepository.save(livro);
 
         return new LivroResponseDTO(
                 salvo.getId(), salvo.getTitulo(), salvo.getAutor(),
-                salvo.getIsbn(), salvo.getPreco(), salvo.getQuantidadeEstoque()
+                salvo.getIsbn(), salvo.getPreco(), salvo.getQuantidadeEstoque(),  salvo.getAnoPublicacao()
         );
     }
 

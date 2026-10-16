@@ -73,4 +73,9 @@ public class Carrinho {
     public void setDataAdicao(LocalDateTime dataAdicao) {
         this.dataAdicao = dataAdicao;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        this.dataAdicao = LocalDateTime.now();
+    }
 }

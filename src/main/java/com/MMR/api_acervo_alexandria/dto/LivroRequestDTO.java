@@ -21,7 +21,10 @@ public record LivroRequestDTO(
 
         @NotNull(message = "A quantidade em estoque é obrigatório.")
         @Min(value = 0, message = "O estoque não pode ser negativo.")
-        Integer quantidadeEstoque
+        Integer quantidadeEstoque,
+
+        @NotNull(message = "O ano de publicação é obrigatório.")
+        Integer anoPublicacao // Vou ignorar data miníma.
 
 ) {
 }

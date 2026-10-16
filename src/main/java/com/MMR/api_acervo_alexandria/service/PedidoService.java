@@ -49,6 +49,8 @@ public class PedidoService {
         pedido.setDataPedido(LocalDateTime.now());
         pedido.setStatus(StatusPedido.PROCESSANDO);
 
+        pedido.setValorTotal(BigDecimal.ZERO);
+
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         List<ItemPedidoResponseDTO> itensResponse = new ArrayList<>();
 

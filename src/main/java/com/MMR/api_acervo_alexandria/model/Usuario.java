@@ -34,6 +34,7 @@ public class Usuario {
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     private Credencial credencial;
 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Carrinho> itensCarrinho = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario")

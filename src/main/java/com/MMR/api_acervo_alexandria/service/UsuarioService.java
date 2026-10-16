@@ -8,12 +8,26 @@ import com.MMR.api_acervo_alexandria.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
     public UsuarioService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
+    }
+
+    public List<UsuarioResponseDTO> listarTodos() {
+        return usuarioRepository.findAll().stream()
+                .map(usuario -> new UsuarioResponseDTO(
+                        usuario.getId(),
+                        usuario.getNome(),
+                        usuario.getEmail(),
+                        usuario.getTelefoneFixo(),
+                        usuario.getTelefoneMovel(),
+                        usuario.getEndereco()))
+                .toList();
     }
 
     @Transactional
@@ -31,6 +45,7 @@ public class UsuarioService {
         usuario.setTelefoneFixo(dto.telefoneFixo());
         usuario.setTelefoneMovel(dto.telefoneMovel());
         usuario.setEmail(dto.email());
+        usuario.setEndereco(dto.endereco());
 
         Credencial credencial = new Credencial();
         credencial.setSenhaHash(dto.senha()); // Futuramente aplicaremos o BCrypt aqui
@@ -42,7 +57,7 @@ public class UsuarioService {
 
         return new UsuarioResponseDTO(
                 salvo.getId(), salvo.getNome(),
-                salvo.getEmail(), salvo.getTelefoneFixo(), salvo.getTelefoneMovel()
+                salvo.getEmail(), salvo.getTelefoneFixo(), salvo.getTelefoneMovel(), salvo.getEndereco()
         );
     }
 
@@ -52,7 +67,7 @@ public class UsuarioService {
 
         return new UsuarioResponseDTO(
                 usuario.getId(), usuario.getNome(),
-                usuario.getEmail(), usuario.getTelefoneFixo(), usuario.getTelefoneMovel()
+                usuario.getEmail(), usuario.getTelefoneFixo(), usuario.getTelefoneMovel(), usuario.getEndereco()
         );
     }
 
@@ -65,6 +80,7 @@ public class UsuarioService {
         usuario.setTelefoneFixo(dto.telefoneFixo());
         usuario.setTelefoneMovel(dto.telefoneMovel());
         usuario.setEmail(dto.email());
+        usuario.setEndereco(dto.endereco());
 
         // Como CascadeType.ALL está ativo, alterar a credencial aqui já atualiza o banco
         usuario.getCredencial().setSenhaHash(dto.senha());
@@ -73,7 +89,7 @@ public class UsuarioService {
 
         return new UsuarioResponseDTO(
                 salvo.getId(), salvo.getNome(),
-                salvo.getEmail(), salvo.getTelefoneFixo(), salvo.getTelefoneMovel()
+                salvo.getEmail(), salvo.getTelefoneFixo(), salvo.getTelefoneMovel(), salvo.getEndereco()
         );
     }
 

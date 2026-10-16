@@ -7,5 +7,6 @@ public record LivroResponseDTO(Long id,
                                String autor,
                                String isbn,
                                BigDecimal preco,
-                               Integer quantidadeEstoque) {
+                               Integer quantidadeEstoque,
+                               Integer anoPublicacao) {
 }
