@@ -34,7 +34,7 @@ public class AutenticacaoController {
 
         var authenticateToken = manager.authenticate(authToken);
 
-        Usuario usuario = usuarioRepository.findByEmail(dados.email())
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(dados.email())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
         String tokenJWT = tokenService.gerarToken(usuario);

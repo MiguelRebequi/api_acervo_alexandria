@@ -7,6 +7,8 @@ import com.MMR.api_acervo_alexandria.service.PedidoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,14 +24,14 @@ public class PedidoController {
     }
 
     @PostMapping
-    public ResponseEntity<PedidoResponseDTO> finalizarCompra(@Valid @RequestBody PedidoRequestDTO dto) {
-        PedidoResponseDTO response = pedidoService.finalizarCompra(dto);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public ResponseEntity<PedidoResponseDTO> finalizarCompra(@AuthenticationPrincipal UserDetails userDetails) {
+        PedidoResponseDTO response = pedidoService.finalizarCompra(userDetails.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<PedidoResponseDTO>> listarHistorico(@PathVariable Long usuarioId) {
-        List<PedidoResponseDTO> response = pedidoService.listarHistorico(usuarioId);
+    @GetMapping("/historico")
+    public ResponseEntity<List<PedidoResponseDTO>> listarHistorico(@AuthenticationPrincipal UserDetails userDetails) {
+        List<PedidoResponseDTO> response = pedidoService.listarHistorico(userDetails.getUsername());
         return ResponseEntity.ok(response);
     }
 

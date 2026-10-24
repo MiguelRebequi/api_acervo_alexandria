@@ -33,7 +33,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         if (tokenJWT != null) {
             String emailUsuario = tokenService.getSubject(tokenJWT);
-            var usuarioOptional = usuarioRepository.findByEmail(emailUsuario);
+            var usuarioOptional = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario);
             if (usuarioOptional.isPresent()) {
                 var usuario = usuarioOptional.get();
                 UserDetails userDetails = User.builder()
