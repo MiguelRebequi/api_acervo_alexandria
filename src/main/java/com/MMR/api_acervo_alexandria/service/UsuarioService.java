@@ -6,6 +6,7 @@ import com.MMR.api_acervo_alexandria.model.Credencial;
 import com.MMR.api_acervo_alexandria.model.Usuario;
 import com.MMR.api_acervo_alexandria.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +14,11 @@ import java.util.List;
 @Service
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository,  PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UsuarioResponseDTO> listarTodos() {
@@ -48,7 +51,7 @@ public class UsuarioService {
         usuario.setEndereco(dto.endereco());
 
         Credencial credencial = new Credencial();
-        credencial.setSenhaHash(dto.senha()); // Futuramente aplicaremos o BCrypt aqui
+        credencial.setSenhaHash(passwordEncoder.encode(dto.senha())); // Futuramente aplicaremos o BCrypt aqui
         credencial.setUsuario(usuario);
 
         usuario.setCredencial(credencial);
@@ -83,7 +86,7 @@ public class UsuarioService {
         usuario.setEndereco(dto.endereco());
 
         // Como CascadeType.ALL está ativo, alterar a credencial aqui já atualiza o banco
-        usuario.getCredencial().setSenhaHash(dto.senha());
+        usuario.getCredencial().setSenhaHash(passwordEncoder.encode(dto.senha()));
 
         Usuario salvo = usuarioRepository.save(usuario);
 
