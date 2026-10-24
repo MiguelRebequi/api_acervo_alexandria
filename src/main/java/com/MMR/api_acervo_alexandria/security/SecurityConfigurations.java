@@ -40,8 +40,7 @@ public class SecurityConfigurations {
                     // Rotas públicas (qualquer um acessa sem tokens)
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();
-                    req.requestMatchers(HttpMethod.POST, "/livros/**").permitAll();
-
+                    req.requestMatchers(HttpMethod.GET, "/livros/**").permitAll();
                     // Qualquer outra rota exige apresentação do token JWT
                     req.anyRequest().authenticated();
                 })
