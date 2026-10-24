@@ -1,7 +1,6 @@
 package com.MMR.api_acervo_alexandria.service;
 
 import com.MMR.api_acervo_alexandria.dto.ItemPedidoResponseDTO;
-import com.MMR.api_acervo_alexandria.dto.PedidoRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.PedidoResponseDTO;
 import com.MMR.api_acervo_alexandria.model.*;
 import com.MMR.api_acervo_alexandria.repository.*;
@@ -34,8 +33,8 @@ public class PedidoService {
     }
 
     @Transactional
-    public PedidoResponseDTO finalizarCompra(PedidoRequestDTO dto) {
-        Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(dto.usuarioId())
+    public PedidoResponseDTO finalizarCompra(String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
 
         List<Carrinho> itensCarrinho = carrinhoRepository.findByUsuarioId(usuario.getId());
@@ -92,12 +91,11 @@ public class PedidoService {
         );
     }
 
-    public List<PedidoResponseDTO> listarHistorico(Long usuarioId) {
-        if (usuarioRepository.findById(usuarioId).isEmpty()) {
-            throw new RuntimeException("Usuário não encontrado ou inativo.");
-        }
+    public List<PedidoResponseDTO> listarHistorico(String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
 
-        List<Pedido> pedidos = pedidoRepository.findByUsuarioId(usuarioId);
+        List<Pedido> pedidos = pedidoRepository.findByUsuarioId(usuario.getId());
 
         return pedidos.stream().map(pedido -> {
             List<ItemPedidoResponseDTO> itens = buscarItensDoPedido(pedido.getId());

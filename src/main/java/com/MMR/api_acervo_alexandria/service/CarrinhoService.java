@@ -30,8 +30,8 @@ public class CarrinhoService {
     }
 
     @Transactional
-    public CarrinhoResponseDTO adicionarItem(CarrinhoRequestDTO dto) {
-        Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(dto.usuarioId())
+    public CarrinhoResponseDTO adicionarItem(CarrinhoRequestDTO dto, String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
 
         Livro livro = livroRepository.findByIdAndAtivoTrue(dto.livroId())
@@ -64,12 +64,11 @@ public class CarrinhoService {
         );
     }
 
-    public List<CarrinhoResponseDTO> listarCarrinho(Long usuarioId) {
-        if (usuarioRepository.findByIdAndAtivoTrue(usuarioId).isEmpty()) {
-            throw new RuntimeException("Usuário não encontrado ou inativo.");
-        }
+    public List<CarrinhoResponseDTO> listarCarrinho(String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
 
-        List<Carrinho> itens = carrinhoRepository.findByUsuarioId(usuarioId);
+        List<Carrinho> itens = carrinhoRepository.findByUsuarioId(usuario.getId());
 
         return itens.stream().map(item -> {
             BigDecimal subtotal = item.getLivro().getPreco().multiply(BigDecimal.valueOf(item.getQuantidade()));
@@ -81,9 +80,13 @@ public class CarrinhoService {
     }
 
     @Transactional
-    public CarrinhoResponseDTO atualizarQuantidade(Long usuarioId, Long livroId, Integer novaQuantidade) {
-        Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndLivroId(usuarioId, livroId)
+    public CarrinhoResponseDTO atualizarQuantidade(String emailUsuario, Long livroId, Integer novaQuantidade) {
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
+
+        Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndLivroId(usuario.getId(), livroId)
                 .orElseThrow(() -> new RuntimeException("Item não encontrado no carrinho."));
+
         if(carrinho.getLivro().getQuantidadeEstoque() < novaQuantidade) {
             throw new RuntimeException("Estoque insuficiente para a quantidade solicitada.");
         }
@@ -98,8 +101,11 @@ public class CarrinhoService {
     }
 
     @Transactional
-    public void removerItem(Long usuarioId, Long livroId) {
-        Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndLivroId(usuarioId, livroId)
+    public void removerItem(String emailUsuario, Long livroId) {
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
+
+        Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndLivroId(usuario.getId(), livroId)
                 .orElseThrow(() -> new RuntimeException("Item não encontrado no carrinho."));
 
         carrinhoRepository.delete(carrinho);

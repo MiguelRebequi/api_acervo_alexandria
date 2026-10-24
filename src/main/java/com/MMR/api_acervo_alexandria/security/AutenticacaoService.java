@@ -22,7 +22,7 @@ public class AutenticacaoService implements UserDetailsService {
     @NonNull
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
         // 1. Busca o usuário pelo e-mail no PostgreSQL
-        Usuario usuario = usuarioRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado!"));
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(username).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado!"));
 
 
         return User.builder()
