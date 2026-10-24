@@ -4,9 +4,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record CarrinhoRequestDTO(
-        @NotNull(message = "O ID do usuário é obrigatório.")
-        Long usuarioId,
-
         @NotNull(message = "O ID do livro é obrigatório.")
         Long livroId,
 
