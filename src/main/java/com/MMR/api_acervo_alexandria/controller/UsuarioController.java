@@ -1,8 +1,10 @@
 package com.MMR.api_acervo_alexandria.controller;
 
 import com.MMR.api_acervo_alexandria.dto.LivroRequestDTO;
+import com.MMR.api_acervo_alexandria.dto.LivroResponseDTO;
 import com.MMR.api_acervo_alexandria.dto.UsuarioRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.UsuarioResponseDTO;
+import com.MMR.api_acervo_alexandria.model.Usuario;
 import com.MMR.api_acervo_alexandria.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -48,6 +50,12 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> excluir(@PathVariable Long id){
         usuarioService.excluir(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/reativar")
+    public ResponseEntity<UsuarioResponseDTO> reativar(@PathVariable Long id) {
+        usuarioService.reativar(id);
         return ResponseEntity.noContent().build();
     }
 

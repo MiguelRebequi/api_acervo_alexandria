@@ -5,6 +5,7 @@ import com.MMR.api_acervo_alexandria.dto.UsuarioResponseDTO;
 import com.MMR.api_acervo_alexandria.model.Credencial;
 import com.MMR.api_acervo_alexandria.model.Usuario;
 import com.MMR.api_acervo_alexandria.repository.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class UsuarioService {
     }
 
     public List<UsuarioResponseDTO> listarTodos() {
-        return usuarioRepository.findAll().stream()
+        return usuarioRepository.findByAtivoTrue().stream()
                 .map(usuario -> new UsuarioResponseDTO(
                         usuario.getId(),
                         usuario.getNome(),
@@ -66,7 +67,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO buscarPorId(Long id) {
         Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
 
         return new UsuarioResponseDTO(
                 usuario.getId(), usuario.getNome(),
@@ -77,7 +78,7 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO dto) {
         Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
         usuario.setNome(dto.nome());
         usuario.setCpf(dto.cpf());
         usuario.setTelefoneFixo(dto.telefoneFixo());
@@ -100,9 +101,22 @@ public class UsuarioService {
     @Transactional
     public void excluir(Long id) {
         Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
 
         usuario.setAtivo(false); // Exclusão Lógica
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void reativar(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
+
+        if (Boolean.TRUE.equals(usuario.getAtivo())) {
+            throw new RuntimeException("O usuário já está ativo!.");
+        }
+
+        usuario.setAtivo(true);
         usuarioRepository.save(usuario);
     }
 }

@@ -40,7 +40,9 @@ public class SecurityConfigurations {
                     // Rotas públicas (qualquer um acessa sem tokens)
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();
-                    req.requestMatchers(HttpMethod.GET, "/livros/**").permitAll();
+                    req.requestMatchers(HttpMethod.GET, "/livros", "/livros/**").permitAll();
+                    req.requestMatchers("/error").permitAll();
+                    req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
                     // Qualquer outra rota exige apresentação do token JWT
                     req.anyRequest().authenticated();
                 })

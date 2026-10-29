@@ -47,4 +47,10 @@ public class PedidoController {
         PedidoResponseDTO response = pedidoService.atualizarStatus(id, status);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/status-disponiveis")
+    public ResponseEntity<StatusPedido[]> listarStatus() {
+        // O método .values() do Enum já devolve um array com todas as opções
+        return ResponseEntity.ok(StatusPedido.values());
+    }
 }

@@ -8,6 +8,7 @@ import com.MMR.api_acervo_alexandria.model.Usuario;
 import com.MMR.api_acervo_alexandria.repository.CarrinhoRepository;
 import com.MMR.api_acervo_alexandria.repository.LivroRepository;
 import com.MMR.api_acervo_alexandria.repository.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -103,10 +104,10 @@ public class CarrinhoService {
     @Transactional
     public void removerItem(String emailUsuario, Long livroId) {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou inativo."));
 
         Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndLivroId(usuario.getId(), livroId)
-                .orElseThrow(() -> new RuntimeException("Item não encontrado no carrinho."));
+                .orElseThrow(() -> new EntityNotFoundException("Item não encontrado no carrinho."));
 
         carrinhoRepository.delete(carrinho);
     }
