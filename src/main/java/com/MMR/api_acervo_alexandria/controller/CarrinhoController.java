@@ -41,13 +41,13 @@ public class CarrinhoController {
 
     @PutMapping("/itens/{livroId}")
     public ResponseEntity<CarrinhoResponseDTO> atualizarQuantidade(
-            @PathVariable Long livroId, // usuarioId removido
+            @PathVariable Long livroId,
             @RequestParam Integer quantidade,
             @AuthenticationPrincipal UserDetails userDetails) {
         CarrinhoResponseDTO response = carrinhoService.atualizarQuantidade(userDetails.getUsername(), livroId, quantidade);        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/usuario/{usuarioId}/itens/{livroId}")
+    @DeleteMapping("/itens/{livroId}")
     public ResponseEntity<Void> removerItem(@PathVariable Long livroId, @AuthenticationPrincipal UserDetails userDetails) {
         carrinhoService.removerItem(userDetails.getUsername(), livroId);
         return ResponseEntity.noContent().build();
