@@ -21,13 +21,32 @@ public class TokenService {
     public String gerarToken(Usuario usuario) {
         try {
             Algorithm algoritmo = Algorithm.HMAC256(secret);
+
+            String roleName = (usuario.getRole() != null) ? usuario.getRole().name() : "USER";
+
             return JWT.create()
                     .withIssuer("API Acervo Alexandria")
                     .withSubject(usuario.getEmail())
+                    .withClaim("role", roleName)
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Erro ao gerar token JWT", exception);
+        }
+    }
+
+    public String getRole(String tokenJWT) {
+        try {
+            Algorithm algoritmo = Algorithm.HMAC256(secret);
+
+            return JWT.require(algoritmo)
+                    .withIssuer("API Acervo Alexandria")
+                    .build()
+                    .verify(tokenJWT)
+                    .getClaim("role")
+                    .asString();
+        } catch (JWTVerificationException exception) {
+            throw new RuntimeException("Token JWT inválido ou expirado!");
         }
     }
 
