@@ -43,6 +43,9 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean ativo = true; // Todo Registro de Usuário já nasce ativo por padrão
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     public Usuario() {}
 
     public Usuario(String nome, String email, String endereco) {
@@ -137,5 +140,13 @@ public class Usuario {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }
