@@ -32,18 +32,23 @@ public class SecurityConfigurations {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
+        return http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    // Rotas públicas (qualquer um acessa sem tokens)
+                    // 1. Rotas Públicas (Ninguém precisa de token)
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
-                    req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();
-                    req.requestMatchers(HttpMethod.GET, "/livros", "/livros/**").permitAll();
-                    req.requestMatchers("/error").permitAll();
-                    req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
-                    // Qualquer outra rota exige apresentação do token JWT
+                    req.requestMatchers(HttpMethod.GET, "/livros/**").permitAll(); // Catálogo de livros visível para todos
+                    req.requestMatchers(HttpMethod.GET, "/pedidos/status-disponiveis").permitAll(); // Auxiliar do front-end
+                    req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll(); // Swagger UI
+
+                    // 2. Rotas Exclusivas de Administração (Gerenciamento de Estoque)
+                    req.requestMatchers(HttpMethod.POST, "/livros").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PUT, "/livros/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.DELETE, "/livros/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PATCH, "/livros/**").hasRole("ADMIN");
+
+                    // 3. Qualquer outra rota exige no mínimo estar logado (Carrinho, Pedidos, etc.)
+                    // Como configuramos que o ADMIN também recebe a permissão "USER", ele passa aqui também.
                     req.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
