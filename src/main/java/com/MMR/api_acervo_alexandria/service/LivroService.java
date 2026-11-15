@@ -26,26 +26,13 @@ public class LivroService {
             throw new RuntimeException("Já existe um livro cadastrado com este ISBN.");
         }
 
-        Livro livro = new Livro();
-        livro.setTitulo(dto.titulo());
-        livro.setAutor(dto.autor());
-        livro.setIsbn(dto.isbn());
-        livro.setPreco(dto.preco());
-        livro.setQuantidadeEstoque(dto.quantidadeEstoque());
-        livro.setAnoPublicacao(dto.anoPublicacao());
-
-        Livro salvo = livroRepository.save(livro);
+        Livro salvo = livroRepository.save(new Livro(dto));
 
         return new LivroResponseDTO(salvo);
-
-
     }
     public Page<LivroResponseDTO> listarTodos(Pageable pageable) {
         return livroRepository.findByAtivoTrue(pageable)
-                .map(livro -> new LivroResponseDTO(
-                        livro.getId(), livro.getTitulo(), livro.getAutor(),
-                        livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque(), livro.getAnoPublicacao()
-                ));
+                .map(LivroResponseDTO::new);
     }
 
     public LivroResponseDTO buscarPorId(Long id) {
@@ -64,10 +51,7 @@ public class LivroService {
 
     public Page<LivroResponseDTO> buscarPorTitulo(String titulo, Pageable pageable) {
         return livroRepository.findByTituloContainingIgnoreCaseAndAtivoTrue(titulo, pageable)
-                .map(livro -> new LivroResponseDTO(
-                        livro.getId(), livro.getTitulo(), livro.getAutor(),
-                        livro.getIsbn(), livro.getPreco(), livro.getQuantidadeEstoque(),  livro.getAnoPublicacao()
-                ));
+                .map(LivroResponseDTO::new);
     }
 
     @Transactional
@@ -80,16 +64,8 @@ public class LivroService {
             throw new RuntimeException("Já existe outro livro cadastrado com este ISBN.");
         }
 
-        livro.setTitulo(dto.titulo());
-        livro.setAutor(dto.autor());
-        livro.setIsbn(dto.isbn());
-        livro.setPreco(dto.preco());
-        livro.setQuantidadeEstoque(dto.quantidadeEstoque());
-        livro.setAnoPublicacao(dto.anoPublicacao());
-
-        Livro salvo = livroRepository.save(livro);
-
-        return new LivroResponseDTO(salvo);
+        livro.atualizarDados(dto);
+        return new LivroResponseDTO(livroRepository.save(livro));
     }
 
     @Transactional
