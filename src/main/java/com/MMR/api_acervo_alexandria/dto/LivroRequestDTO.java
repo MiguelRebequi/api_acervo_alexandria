@@ -1,5 +1,6 @@
 package com.MMR.api_acervo_alexandria.dto;
 
+import com.MMR.api_acervo_alexandria.model.FormatoLivro;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -14,6 +15,19 @@ public record LivroRequestDTO(
 
         @NotBlank(message = "O ISBN é obrigatório.")
         String isbn,
+
+        @NotBlank(message = "A editora é obrigatória.")
+        String editora,
+
+        @NotBlank(message = "O idioma é obrigatório.")
+        String idioma,
+
+        @NotNull(message = "O formato do livro é obrigatório.")
+        FormatoLivro formato,
+
+        @DecimalMin(value = "0.0", message = "A avaliação mínima é 0.0.")
+        @DecimalMax(value = "5.0", message = "A avaliação máxima é 5.0.")
+        BigDecimal avaliacao,
 
         @NotNull(message = "O preço é obrigatório.")
         @Positive(message = "O preço deve ser maior que zero.")
