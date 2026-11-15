@@ -37,6 +37,8 @@ public class SecurityConfigurations {
                 .authorizeHttpRequests(req -> {
                     // 1. Rotas Públicas (Ninguém precisa de token)
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/login/redefinir-senha").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll(); // Permite criar conta nova
                     req.requestMatchers(HttpMethod.GET, "/livros/**").permitAll(); // Catálogo de livros visível para todos
                     req.requestMatchers(HttpMethod.GET, "/pedidos/status-disponiveis").permitAll(); // Auxiliar do front-end
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll(); // Swagger UI
