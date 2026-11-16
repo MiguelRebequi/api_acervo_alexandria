@@ -297,7 +297,7 @@ A API conta com documentação interativa integrada via **Swagger UI**, acessív
     </td>
     <td align="center" valign="top">
       <a href="https://github.com/GuilhermeChiuchi">
-        <img src="https://avatars.githubusercontent.com/u/136472706" width="200px;" alt="Guilherme Chiuchi Pereira"/>
+        <img src="https://avatars.githubusercontent.com/u/130666846" width="200px;" alt="Guilherme Chiuchi Pereira"/>
       </a>
       <br />
       <p><b>Marcus Vinicius Correia</b></p>
