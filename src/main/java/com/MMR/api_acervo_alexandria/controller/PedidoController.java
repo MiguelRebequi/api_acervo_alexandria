@@ -24,8 +24,8 @@ public class PedidoController {
     }
 
     @PostMapping
-    public ResponseEntity<PedidoResponseDTO> finalizarCompra(@AuthenticationPrincipal UserDetails userDetails) {
-        PedidoResponseDTO response = pedidoService.finalizarCompra(userDetails.getUsername());
+    public ResponseEntity<PedidoResponseDTO> finalizarCompra(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody PedidoRequestDTO dto) {
+        PedidoResponseDTO response = pedidoService.finalizarCompra(userDetails.getUsername(), dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

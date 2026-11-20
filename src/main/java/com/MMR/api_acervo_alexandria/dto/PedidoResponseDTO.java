@@ -11,7 +11,14 @@ public record PedidoResponseDTO(
         String nomeCliente,
         LocalDateTime dataRealizacao,
         StatusPedido status,
+        BigDecimal subtotal,
+        BigDecimal valorFrete,
+        BigDecimal valorDesconto,
         BigDecimal valorTotal,
+        String cupom,
+        String metodoEntrega,
+        String enderecoCompleto,
+        String metodoPagamento,
+        Integer parcelas,
         List<ItemPedidoResponseDTO> itensPedido
-) {
-}
+) {}
