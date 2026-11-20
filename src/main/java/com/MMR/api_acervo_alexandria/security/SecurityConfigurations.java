@@ -1,5 +1,6 @@
 package com.MMR.api_acervo_alexandria.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,9 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfigurations {
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
 
     private final SecurityFilter securityFilter;
 
@@ -76,7 +80,10 @@ public class SecurityConfigurations {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*")); // Libera qualquer origem temporariamente
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                        .map(String::trim)
+                        .toList();
+        configuration.setAllowedOrigins(origins); // Libera qualquer origem temporariamente
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
