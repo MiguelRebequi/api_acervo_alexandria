@@ -51,7 +51,7 @@ public class LivroService {
     }
 
     public Page<LivroResponseDTO> buscarPorTitulo(String titulo, Pageable pageable) {
-        return livroRepository.findByTituloContainingIgnoreCaseAndAtivoTrue(titulo, pageable)
+        return livroRepository.buscarPorTituloOuAutor(titulo, pageable)
                 .map(LivroResponseDTO::new);
     }
 
