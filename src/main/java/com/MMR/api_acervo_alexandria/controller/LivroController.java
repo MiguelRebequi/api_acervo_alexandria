@@ -65,7 +65,8 @@ public class LivroController {
     @GetMapping("/busca")
     public ResponseEntity<Page<LivroResponseDTO>> buscarPorTitulo(
             @RequestParam String titulo,
-            @org.springframework.data.web.PageableDefault(size = 10) org.springframework.data.domain.Pageable pageable) {
+            @ParameterObject
+            @PageableDefault(size = 10, sort = "titulo", direction = Sort.Direction.ASC) Pageable pageable) {
 
         Page<LivroResponseDTO> response = livroService.buscarPorTitulo(titulo, pageable);
         return ResponseEntity.ok(response);
