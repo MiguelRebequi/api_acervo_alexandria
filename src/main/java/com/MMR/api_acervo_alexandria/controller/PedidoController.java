@@ -36,8 +36,8 @@ public class PedidoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PedidoResponseDTO> buscarDetalhes(@PathVariable Long id){
-        PedidoResponseDTO response = pedidoService.buscarDetalhes(id);
+    public ResponseEntity<PedidoResponseDTO> buscarDetalhes(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        PedidoResponseDTO response = pedidoService.buscarDetalhes(id, userDetails);
         return ResponseEntity.ok(response);
     }
 

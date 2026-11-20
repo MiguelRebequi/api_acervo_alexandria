@@ -48,6 +48,7 @@ public class SecurityConfigurations {
 
                     // 2. Rotas Exclusivas de Administração (Gerenciamento de Estoque)
                     req.requestMatchers(HttpMethod.GET, "/usuarios").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PUT, "/pedidos/*/status").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.POST, "/livros").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.PUT, "/livros/**").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.DELETE, "/livros/**").hasRole("ADMIN");

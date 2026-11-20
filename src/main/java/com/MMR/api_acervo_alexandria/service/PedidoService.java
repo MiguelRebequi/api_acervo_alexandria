@@ -6,6 +6,8 @@ import com.MMR.api_acervo_alexandria.model.*;
 import com.MMR.api_acervo_alexandria.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -107,9 +109,16 @@ public class PedidoService {
         }).collect(Collectors.toList());
     }
 
-    public PedidoResponseDTO buscarDetalhes(Long pedidoId) {
+    public PedidoResponseDTO buscarDetalhes(Long pedidoId, UserDetails userDetails) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        if (!isAdmin && !pedido.getUsuario().getEmail().equals(userDetails.getUsername())) {
+            throw new AccessDeniedException("Acesso negado: você só pode visualizar os detalhes dos seus próprios pedidos.");
+        }
 
         List<ItemPedidoResponseDTO> itens = buscarItensDoPedido(pedido.getId());
 
