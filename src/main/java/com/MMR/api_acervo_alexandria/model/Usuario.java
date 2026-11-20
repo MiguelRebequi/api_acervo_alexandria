@@ -40,6 +40,12 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario")
     private List<Pedido> pedidos = new ArrayList<>();
 
+    @Column(name = "foto", columnDefinition = "BYTEA")
+    private byte[] foto;
+
+    @Column(name = "foto_tipo", length = 50)
+    private String fotoTipo;
+
     @Column(nullable = false)
     private Boolean ativo = true; // Todo Registro de Usuário já nasce ativo por padrão
 
@@ -148,5 +154,21 @@ public class Usuario {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public byte[] getFoto() {
+        return foto;
+    }
+
+    public void setFoto(byte[] foto) {
+        this.foto = foto;
+    }
+
+    public String getFotoTipo() {
+        return fotoTipo;
+    }
+
+    public void setFotoTipo(String fotoTipo) {
+        this.fotoTipo = fotoTipo;
     }
 }
