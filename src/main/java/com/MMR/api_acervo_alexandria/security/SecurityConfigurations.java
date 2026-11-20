@@ -47,6 +47,7 @@ public class SecurityConfigurations {
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll(); // Swagger UI
 
                     // 2. Rotas Exclusivas de Administração (Gerenciamento de Estoque)
+                    req.requestMatchers(HttpMethod.GET, "/usuarios").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.POST, "/livros").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.PUT, "/livros/**").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.DELETE, "/livros/**").hasRole("ADMIN");
@@ -75,7 +76,7 @@ public class SecurityConfigurations {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("*")); // Libera qualquer origem temporariamente
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

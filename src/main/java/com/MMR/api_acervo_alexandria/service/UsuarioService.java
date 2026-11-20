@@ -9,6 +9,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -66,6 +69,7 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDTO buscarPorId(Long id) {
+        validarDonoOuAdmin(id);
         Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
 
@@ -77,6 +81,7 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO dto) {
+        validarDonoOuAdmin(id);
         Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
         usuario.setNome(dto.nome());
@@ -100,6 +105,7 @@ public class UsuarioService {
 
     @Transactional
     public void excluir(Long id) {
+        validarDonoOuAdmin(id);
         Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
 
@@ -109,6 +115,7 @@ public class UsuarioService {
 
     @Transactional
     public void reativar(Long id) {
+        validarDonoOuAdmin(id);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
 
@@ -119,4 +126,26 @@ public class UsuarioService {
         usuario.setAtivo(true);
         usuarioRepository.save(usuario);
     }
+
+    private void validarDonoOuAdmin(Long idAlvo) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new AccessDeniedException("Usuário não autenticado.");
+        }
+
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        if (isAdmin) {
+            return;
+        }
+
+        Usuario logado = usuarioRepository.findByEmailAndAtivoTrue(auth.getName())
+                .orElseThrow(() -> new AccessDeniedException("Usuário autenticado não encontrado."));
+
+        if (!logado.getId().equals(idAlvo)) {
+            throw new AccessDeniedException("Acesso negado: você só pode acessar ou modificar a sua própria conta.");        }
+    }
+
+
 }
