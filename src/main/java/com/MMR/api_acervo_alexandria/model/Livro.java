@@ -6,7 +6,10 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "livro")
+@Table(name = "livro", indexes = {
+        @Index(name = "idx_livro_titulo", columnList = "titulo"),
+        @Index(name = "idx_livro_categoria", columnList = "categoria")
+})
 public class Livro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
