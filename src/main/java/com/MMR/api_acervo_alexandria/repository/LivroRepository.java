@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @Repository
 public interface LivroRepository extends CrudRepository<Livro,Long> {
@@ -34,4 +35,21 @@ public interface LivroRepository extends CrudRepository<Livro,Long> {
               )
             """)
     Page<Livro> buscarPorTituloOuAutor(@Param("termo") String termo, Pageable pageable);
+
+    @Query("""
+            SELECT l FROM Livro l
+            WHERE l.ativo = true
+              AND (:categoria = '' OR LOWER(function('unaccent', COALESCE(l.categoria, ''))) = LOWER(function('unaccent', :categoria)))
+              AND l.preco >= :precoMin
+              AND l.preco <= :precoMax
+            """)
+    Page<Livro> filtrarLivros(
+            @Param("categoria") String categoria,
+            @Param("precoMin") BigDecimal precoMin,
+            @Param("precoMax") BigDecimal precoMax,
+            Pageable pageable
+    );
+
+    @Query("SELECT DISTINCT l.categoria FROM Livro l WHERE l.ativo = true AND l.categoria IS NOT NULL ORDER BY l.categoria ASC")
+    List<String> listarCategoriasAtivas();
 }

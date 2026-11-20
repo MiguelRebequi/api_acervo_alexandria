@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class LivroService {
@@ -31,9 +33,23 @@ public class LivroService {
 
         return new LivroResponseDTO(salvo);
     }
-    public Page<LivroResponseDTO> listarTodos(Pageable pageable) {
-        return livroRepository.findByAtivoTrue(pageable)
+    public Page<LivroResponseDTO> listarTodos(String categoria, BigDecimal precoMin, BigDecimal precoMax, Pageable pageable) {
+        boolean semFiltros = (categoria == null || categoria.isBlank()) && precoMin == null && precoMax == null;
+        if (semFiltros) {
+            return livroRepository.findByAtivoTrue(pageable)
+                    .map(LivroResponseDTO::new);
+        }
+
+        String categoriaFiltro = (categoria == null) ? "" : categoria.trim();
+        BigDecimal min = (precoMin != null) ? precoMin : BigDecimal.ZERO;
+        BigDecimal max = (precoMax != null) ? precoMax : new BigDecimal("99999999.99");
+
+        return livroRepository.filtrarLivros(categoriaFiltro, min, max, pageable)
                 .map(LivroResponseDTO::new);
+    }
+
+    public List<String> listarCategorias() {
+        return livroRepository.listarCategoriasAtivas();
     }
 
     public LivroResponseDTO buscarPorId(Long id) {

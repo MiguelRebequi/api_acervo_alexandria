@@ -4,7 +4,6 @@ import com.MMR.api_acervo_alexandria.dto.LivroRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.LivroResponseDTO;
 import com.MMR.api_acervo_alexandria.service.LivroService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.math.BigDecimal;
+
 
 @RestController
 @RequestMapping("/livros")
@@ -34,10 +35,18 @@ public class LivroController {
 
     @GetMapping
     public ResponseEntity<Page<LivroResponseDTO>> listarTodos(
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) BigDecimal precoMin,
+            @RequestParam(required = false) BigDecimal precoMax,
             @ParameterObject
             @PageableDefault(size = 10, sort = "titulo", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<LivroResponseDTO> response = livroService.listarTodos(pageable);
+        Page<LivroResponseDTO> response = livroService.listarTodos(categoria, precoMin, precoMax, pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/categorias")
+    public ResponseEntity<List<String>> listarCategorias() {
+        return ResponseEntity.ok(livroService.listarCategorias());
     }
 
 

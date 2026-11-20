@@ -38,7 +38,15 @@ public record LivroRequestDTO(
         Integer quantidadeEstoque,
 
         @NotNull(message = "O ano de publicação é obrigatório.")
-        Integer anoPublicacao // Vou ignorar data miníma.
+        Integer anoPublicacao, // Vou ignorar data miníma.
+
+        @Size(max = 500, message = "A URL da capa deve ter no máximo 500 caracteres.")
+        String urlCapa,
+
+        String sinopse,
+
+        @Size(max = 100, message = "A categoria deve ter no máximo 100 caracteres.")
+        String categoria
 
 ) {
 }

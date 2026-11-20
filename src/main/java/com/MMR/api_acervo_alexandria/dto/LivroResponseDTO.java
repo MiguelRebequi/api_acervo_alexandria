@@ -11,11 +11,14 @@ public record LivroResponseDTO(Long id,
                                String isbn,
                                String editora,
                                String idioma,
-                               FormatoLivro  formato,
+                               FormatoLivro formato,
                                BigDecimal avaliacao,
                                BigDecimal preco,
                                Integer quantidadeEstoque,
-                               Integer anoPublicacao) {
+                               Integer anoPublicacao,
+                               String urlCapa,
+                               String sinopse,
+                               String categoria) {
     public LivroResponseDTO(Livro livro) {
         this(
                 livro.getId(),
@@ -28,7 +31,10 @@ public record LivroResponseDTO(Long id,
                 livro.getAvaliacao(),
                 livro.getPreco(),
                 livro.getQuantidadeEstoque(),
-                livro.getAnoPublicacao()
+                livro.getAnoPublicacao(),
+                livro.getUrlCapa(),
+                livro.getSinopse(),
+                livro.getCategoria()
         );
     }
 }

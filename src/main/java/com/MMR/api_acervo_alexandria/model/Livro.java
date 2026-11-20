@@ -43,6 +43,15 @@ public class Livro {
     @Column(name = "ano_publicacao", nullable = false)
     private Integer anoPublicacao;
 
+    @Column(name = "url_capa", length = 500)
+    private String urlCapa;
+
+    @Column(columnDefinition = "TEXT")
+    private String sinopse;
+
+    @Column(length = 100)
+    private String categoria;
+
     @Column(nullable = false)
     private Boolean ativo = true; // Todo registro de Livro já nasce ativo por padrão
 
@@ -76,6 +85,9 @@ public class Livro {
         this.preco = dto.preco();
         this.quantidadeEstoque = dto.quantidadeEstoque();
         this.anoPublicacao = dto.anoPublicacao();
+        this.urlCapa = dto.urlCapa();
+        this.sinopse = dto.sinopse();
+        this.categoria = dto.categoria();
     }
 
     public Long getId() {
@@ -172,5 +184,29 @@ public class Livro {
 
     public void setAvaliacao(BigDecimal avaliacao) {
         this.avaliacao = avaliacao;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public String getSinopse() {
+        return sinopse;
+    }
+
+    public void setSinopse(String sinopse) {
+        this.sinopse = sinopse;
+    }
+
+    public String getUrlCapa() {
+        return urlCapa;
+    }
+
+    public void setUrlCapa(String urlCapa) {
+        this.urlCapa = urlCapa;
     }
 }
