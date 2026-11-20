@@ -2,8 +2,10 @@ package com.MMR.api_acervo_alexandria.service;
 
 import com.MMR.api_acervo_alexandria.dto.ItemPedidoResponseDTO;
 import com.MMR.api_acervo_alexandria.dto.PedidoResponseDTO;
+import com.MMR.api_acervo_alexandria.exception.RegraDeNegocioException;
 import com.MMR.api_acervo_alexandria.model.*;
 import com.MMR.api_acervo_alexandria.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
@@ -37,11 +39,11 @@ public class PedidoService {
     @Transactional
     public PedidoResponseDTO finalizarCompra(String emailUsuario) {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou inativo."));
 
         List<Carrinho> itensCarrinho = carrinhoRepository.findByUsuarioId(usuario.getId());
         if (itensCarrinho.isEmpty()) {
-            throw new RuntimeException("O carrinho está vazio.");
+            throw new RegraDeNegocioException("O carrinho está vazio.");
         }
 
         BigDecimal valorTotal = BigDecimal.ZERO;
@@ -60,7 +62,7 @@ public class PedidoService {
 
             // Validação dupla: O livro precisa estar ativo e ter estoque suficiente
             if (!livro.getAtivo() || livro.getQuantidadeEstoque() < item.getQuantidade()) {
-                throw new RuntimeException("O livro " + livro.getTitulo() + " está indisponível ou sem estoque suficiente.");
+                throw new RegraDeNegocioException("O livro " + livro.getTitulo() + " está indisponível ou sem estoque suficiente.");
             }
 
             livro.setQuantidadeEstoque(livro.getQuantidadeEstoque() - item.getQuantidade());
@@ -95,7 +97,7 @@ public class PedidoService {
 
     public List<PedidoResponseDTO> listarHistorico(String emailUsuario) {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou inativo."));
 
         List<Pedido> pedidos = pedidoRepository.findByUsuarioId(usuario.getId());
 
@@ -111,7 +113,7 @@ public class PedidoService {
 
     public PedidoResponseDTO buscarDetalhes(Long pedidoId, UserDetails userDetails) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+                .orElseThrow(() -> new EntityNotFoundException("Pedido não encontrado."));
 
         boolean isAdmin = userDetails.getAuthorities().stream()
                 .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
@@ -131,7 +133,7 @@ public class PedidoService {
     @Transactional
     public PedidoResponseDTO atualizarStatus(Long pedidoId, StatusPedido novoStatus) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+                .orElseThrow(() -> new EntityNotFoundException("Pedido não encontrado."));
 
         pedido.setStatus(novoStatus);
         Pedido salvo = pedidoRepository.save(pedido);

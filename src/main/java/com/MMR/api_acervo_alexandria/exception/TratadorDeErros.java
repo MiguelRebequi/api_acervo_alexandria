@@ -10,11 +10,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class TratadorDeErros {
+
+    private static final Logger log = LoggerFactory.getLogger(TratadorDeErros.class);
 
     // 1. Intercepta buscas de IDs ou ISBNs que não existem e devolve 404
     @ExceptionHandler(EntityNotFoundException.class)
@@ -44,10 +49,18 @@ public class TratadorDeErros {
         );
     }
 
-    // 5. Intercepta regras de negócio (estoque insuficiente, etc.) e devolve 400
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> tratarErroDeRegraDeNegocio(RuntimeException ex) {
+    // 5. Intercepta regras de negócio (estoque insuficiente, CPF não confere, etc.) e devolve 400
+    @ExceptionHandler(RegraDeNegocioException.class)
+    public ResponseEntity<String> tratarErroDeRegraDeNegocio(RegraDeNegocioException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    // 6. Intercepta qualquer erro interno inesperado (NullPointer, erro de banco, etc.) e devolve 500
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> tratarErro500(Exception ex) {
+        log.error("Erro interno inesperado: ", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Erro interno no servidor. Tente novamente mais tarde.");
     }
 
     public record DadosErroValidacao(String campo, String mensagem) {

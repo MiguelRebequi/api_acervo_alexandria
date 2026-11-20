@@ -2,6 +2,7 @@ package com.MMR.api_acervo_alexandria.service;
 
 import com.MMR.api_acervo_alexandria.dto.CarrinhoRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.CarrinhoResponseDTO;
+import com.MMR.api_acervo_alexandria.exception.RegraDeNegocioException;
 import com.MMR.api_acervo_alexandria.model.Carrinho;
 import com.MMR.api_acervo_alexandria.model.Livro;
 import com.MMR.api_acervo_alexandria.model.Usuario;
@@ -33,13 +34,13 @@ public class CarrinhoService {
     @Transactional
     public CarrinhoResponseDTO adicionarItem(CarrinhoRequestDTO dto, String emailUsuario) {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou inativo."));
 
         Livro livro = livroRepository.findByIdAndAtivoTrue(dto.livroId())
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado ou inativo."));
+                .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado ou inativo."));
 
         if (livro.getQuantidadeEstoque() < dto.quantidade()) {
-            throw new RuntimeException("Estoque insuficiente para o livro: " + livro.getTitulo());
+            throw new RegraDeNegocioException("Estoque insuficiente para o livro: " + livro.getTitulo());
         }
 
         Optional<Carrinho> itemExistente = carrinhoRepository.findByUsuarioIdAndLivroId(usuario.getId(), livro.getId());
@@ -67,7 +68,7 @@ public class CarrinhoService {
 
     public List<CarrinhoResponseDTO> listarCarrinho(String emailUsuario) {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou inativo."));
 
         List<Carrinho> itens = carrinhoRepository.findByUsuarioId(usuario.getId());
 
@@ -83,13 +84,13 @@ public class CarrinhoService {
     @Transactional
     public CarrinhoResponseDTO atualizarQuantidade(String emailUsuario, Long livroId, Integer novaQuantidade) {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo."));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou inativo."));
 
         Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndLivroId(usuario.getId(), livroId)
-                .orElseThrow(() -> new RuntimeException("Item não encontrado no carrinho."));
+                .orElseThrow(() -> new EntityNotFoundException("Item não encontrado no carrinho."));
 
         if(carrinho.getLivro().getQuantidadeEstoque() < novaQuantidade) {
-            throw new RuntimeException("Estoque insuficiente para a quantidade solicitada.");
+            throw new RegraDeNegocioException("Estoque insuficiente para a quantidade solicitada.");
         }
         carrinho.setQuantidade(novaQuantidade);
         Carrinho salvo =  carrinhoRepository.save(carrinho);

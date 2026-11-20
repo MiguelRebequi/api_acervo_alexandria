@@ -2,6 +2,7 @@ package com.MMR.api_acervo_alexandria.service;
 
 import com.MMR.api_acervo_alexandria.dto.LivroRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.LivroResponseDTO;
+import com.MMR.api_acervo_alexandria.exception.RegraDeNegocioException;
 import com.MMR.api_acervo_alexandria.model.Livro;
 import com.MMR.api_acervo_alexandria.repository.LivroRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,7 +24,7 @@ public class LivroService {
     @Transactional
     public LivroResponseDTO cadastrar(LivroRequestDTO dto) {
         if (livroRepository.existsByIsbn(dto.isbn())) {
-            throw new RuntimeException("Já existe um livro cadastrado com este ISBN.");
+            throw new RegraDeNegocioException("Já existe um livro cadastrado com este ISBN.");
         }
 
         Livro salvo = livroRepository.save(new Livro(dto));
@@ -61,7 +62,7 @@ public class LivroService {
 
         // Regra de negócio: se o ISBN enviado for diferente do atual, verificar se já existe
         if (!livro.getIsbn().equals(dto.isbn()) && livroRepository.existsByIsbn(dto.isbn())) {
-            throw new RuntimeException("Já existe outro livro cadastrado com este ISBN.");
+            throw new RegraDeNegocioException("Já existe outro livro cadastrado com este ISBN.");
         }
 
         livro.atualizarDados(dto);
@@ -83,7 +84,7 @@ public class LivroService {
                 .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado para o ID: " + id));
 
         if (Boolean.TRUE.equals(livro.getAtivo())) {
-            throw new RuntimeException("O livro já está ativo no catálogo.");
+            throw new RegraDeNegocioException("O livro já está ativo no catálogo.");
         }
 
         livro.setAtivo(true);

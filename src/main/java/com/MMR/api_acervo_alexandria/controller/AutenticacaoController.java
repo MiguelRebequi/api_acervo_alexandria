@@ -3,6 +3,7 @@ package com.MMR.api_acervo_alexandria.controller;
 import com.MMR.api_acervo_alexandria.dto.LoginRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.RedefinirSenhaRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.TokenResponseDTO;
+import com.MMR.api_acervo_alexandria.exception.RegraDeNegocioException;
 import com.MMR.api_acervo_alexandria.model.Usuario;
 import com.MMR.api_acervo_alexandria.repository.UsuarioRepository;
 import com.MMR.api_acervo_alexandria.security.TokenService;
@@ -56,7 +57,7 @@ public class AutenticacaoController {
         // CPF será obrigatório para redefinir a senha
         String cpfLimpo = dados.cpf().replaceAll("\\D", "");
         if (!usuario.getCpf().equals(cpfLimpo)) {
-                throw new RuntimeException("Os dados de validação não conferem com o titular da conta.");
+                throw new RegraDeNegocioException("Os dados de validação não conferem com o titular da conta.");
         }
 
         // Gera o novo hash BCrypt e atualiza a credencial vinculada ao usuário

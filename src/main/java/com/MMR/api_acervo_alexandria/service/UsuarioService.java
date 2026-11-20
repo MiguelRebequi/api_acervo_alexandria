@@ -2,6 +2,7 @@ package com.MMR.api_acervo_alexandria.service;
 
 import com.MMR.api_acervo_alexandria.dto.UsuarioRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.UsuarioResponseDTO;
+import com.MMR.api_acervo_alexandria.exception.RegraDeNegocioException;
 import com.MMR.api_acervo_alexandria.model.Credencial;
 import com.MMR.api_acervo_alexandria.model.Role;
 import com.MMR.api_acervo_alexandria.model.Usuario;
@@ -41,10 +42,10 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
         if (usuarioRepository.existsByCpf(dto.cpf())) {
-            throw new RuntimeException("CPF já cadastrado no sistema.");
+            throw new RegraDeNegocioException("CPF já cadastrado no sistema.");
         }
         if (usuarioRepository.existsByEmail(dto.email())) {
-            throw new RuntimeException("E-mail já cadastrado no sistema.");
+            throw new RegraDeNegocioException("E-mail já cadastrado no sistema.");
         }
 
         Usuario usuario = new Usuario();
