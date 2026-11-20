@@ -9,10 +9,11 @@ public record RedefinirSenhaRequestDTO(
         @Email(message = "Formato de e-mail inválido.")
         String email,
 
-        String cpf, // Opcional: Se enviado pelo front-end, valida titularidade
+        @NotBlank(message = "O CPF é obrigatório para redefinir a senha.")
+        String cpf,
 
         @NotBlank(message = "A nova senha é obrigatória.")
-        @Size(min = 6, message = "A nova senha deve ter no mínimo 6 caracteres.")
+        @Size(min = 6, max = 72, message = "A nova senha deve ter entre 6 e 72 caracteres.")
         String novaSenha
 ) {
 

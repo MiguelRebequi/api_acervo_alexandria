@@ -53,12 +53,10 @@ public class AutenticacaoController {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(dados.email())
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o e-mail informado."));
 
-        // Se o front-end enviou o CPF para confirmar identidade, valida se bate com o cadastro
-        if (dados.cpf() != null && !dados.cpf().isBlank()) {
-            String cpfLimpo = dados.cpf().replaceAll("\\D", "");
-            if (!usuario.getCpf().equals(cpfLimpo)) {
+        // CPF será obrigatório para redefinir a senha
+        String cpfLimpo = dados.cpf().replaceAll("\\D", "");
+        if (!usuario.getCpf().equals(cpfLimpo)) {
                 throw new RuntimeException("Os dados de validação não conferem com o titular da conta.");
-            }
         }
 
         // Gera o novo hash BCrypt e atualiza a credencial vinculada ao usuário
