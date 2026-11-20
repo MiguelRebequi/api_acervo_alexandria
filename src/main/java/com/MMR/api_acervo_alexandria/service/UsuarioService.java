@@ -3,6 +3,7 @@ package com.MMR.api_acervo_alexandria.service;
 import com.MMR.api_acervo_alexandria.dto.UsuarioRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.UsuarioResponseDTO;
 import com.MMR.api_acervo_alexandria.model.Credencial;
+import com.MMR.api_acervo_alexandria.model.Role;
 import com.MMR.api_acervo_alexandria.model.Usuario;
 import com.MMR.api_acervo_alexandria.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -145,6 +146,14 @@ public class UsuarioService {
 
         if (!logado.getId().equals(idAlvo)) {
             throw new AccessDeniedException("Acesso negado: você só pode acessar ou modificar a sua própria conta.");        }
+    }
+
+    @Transactional
+    public void promoverParaAdmin(Long id){
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+        usuario.setRole(Role.ADMIN);
+        usuarioRepository.save(usuario);
     }
 
 
