@@ -16,10 +16,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class PedidoService {
+
+    private static final Set<String> CUPONS_VALIDOS = Set.of(
+            "ALEXANDRIA10", "BEMVINDO20"
+    );
 
     private final PedidoRepository pedidoRepository;
     private final ItemPedidoRepository itemPedidoRepository;
@@ -42,6 +47,8 @@ public class PedidoService {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou inativo."));
 
+        String cupomValidado = validarENormalizarCupom(dto.cupom());
+
         boolean usarItensDoJson = dto.itens() != null && !dto.itens().isEmpty();
         List<Carrinho> itensCarrinho = carrinhoRepository.findByUsuarioId(usuario.getId());
 
@@ -49,7 +56,10 @@ public class PedidoService {
             throw new RegraDeNegocioException("O pedido não possui itens e o carrinho está vazio.");
         }
 
-        Pedido pedidoSalvo = pedidoRepository.save(new Pedido(usuario, dto));
+        Pedido novoPedido = new Pedido(usuario, dto);
+        novoPedido.setCupom(cupomValidado);
+        Pedido pedidoSalvo = pedidoRepository.save(novoPedido);
+
         List<ItemPedidoResponseDTO> itensResponse = new ArrayList<>();
         BigDecimal subtotal = BigDecimal.ZERO;
 
@@ -61,17 +71,30 @@ public class PedidoService {
             }
         } else {
             for (Carrinho item : itensCarrinho) {
-                subtotal = processarItemPedido(pedidoSalvo, item.getLivro(), item.getQuantidade(), subtotal, itensResponse);
+                Livro livro = livroRepository.findByIdAndAtivoTrueComTrava(item.getLivro().getId())
+                        .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado ou inativo: " + item.getLivro().getId()));
+                subtotal = processarItemPedido(pedidoSalvo, livro, item.getQuantidade(), subtotal, itensResponse);
             }
         }
 
-        BigDecimal valorFrete = calcularFrete(pedidoSalvo.getMetodoEntrega(), pedidoSalvo.getCupom());
-        BigDecimal valorDesconto = calcularDesconto(subtotal, pedidoSalvo.getCupom());
-        BigDecimal valorTotal = subtotal.add(valorFrete).subtract(valorDesconto).max(BigDecimal.ZERO);
+        BigDecimal valorFrete = calcularFrete(pedidoSalvo.getMetodoEntrega());
+        BigDecimal descontoCupom = calcularDescontoCupom(subtotal, cupomValidado);
+        BigDecimal subtotalComCupom = subtotal.subtract(descontoCupom).max(BigDecimal.ZERO);
+        BigDecimal totalBase = subtotalComCupom.add(valorFrete);
+
+        BigDecimal ajustePagamento = BigDecimal.ZERO;
+        if ("PIX".equals(pedidoSalvo.getMetodoPagamento())) {
+            ajustePagamento = subtotalComCupom.multiply(new BigDecimal("-0.05")).setScale(2, RoundingMode.HALF_UP);
+        } else if ("CRYPTO".equals(pedidoSalvo.getMetodoPagamento())) {
+            ajustePagamento = totalBase.multiply(new BigDecimal("0.02")).setScale(2, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal valorDescontoTotal = descontoCupom.subtract(ajustePagamento).max(BigDecimal.ZERO);
+        BigDecimal valorTotal = totalBase.add(ajustePagamento).max(BigDecimal.ZERO);
 
         pedidoSalvo.setSubtotal(subtotal);
         pedidoSalvo.setValorFrete(valorFrete);
-        pedidoSalvo.setValorDesconto(valorDesconto);
+        pedidoSalvo.setValorDesconto(valorDescontoTotal);
         pedidoSalvo.setValorTotal(valorTotal);
         pedidoRepository.save(pedidoSalvo);
 
@@ -139,24 +162,32 @@ public class PedidoService {
         return subtotalAtual.add(livro.getPreco().multiply(BigDecimal.valueOf(quantidade)));
     }
 
-    private BigDecimal calcularFrete(String metodoEntrega, String cupom) {
-        if ("FRETEGRATIS".equals(cupom)) {
-            return BigDecimal.ZERO;
+    private String validarENormalizarCupom(String cupom) {
+        if (cupom == null || cupom.isBlank()) {
+            return null;
         }
+        String normalizado = cupom.trim().toUpperCase();
+        if (!CUPONS_VALIDOS.contains(normalizado)) {
+            throw new RegraDeNegocioException("Cupom inválido, esgotado ou expirado.");
+        }
+        return normalizado;
+    }
+
+    private BigDecimal calcularFrete(String metodoEntrega) {
         return switch (metodoEntrega) {
-            case "EXPRESSO" -> new BigDecimal("29.90");
+            case "EXPRESS", "EXPRESSO" -> new BigDecimal("32.90");
             case "RETIRADA" -> BigDecimal.ZERO;
-            default -> new BigDecimal("15.00");
+            default -> new BigDecimal("15.90");
         };
     }
 
-    private BigDecimal calcularDesconto(BigDecimal subtotal, String cupom) {
+    private BigDecimal calcularDescontoCupom(BigDecimal subtotal, String cupom) {
         if (cupom == null) {
             return BigDecimal.ZERO;
         }
         return switch (cupom) {
             case "ALEXANDRIA10" -> subtotal.multiply(new BigDecimal("0.10")).setScale(2, RoundingMode.HALF_UP);
-            case "ALEXANDRIA20" -> subtotal.multiply(new BigDecimal("0.20")).setScale(2, RoundingMode.HALF_UP);
+            case "BEMVINDO20" -> new BigDecimal("20.00").min(subtotal);
             default -> BigDecimal.ZERO;
         };
     }
