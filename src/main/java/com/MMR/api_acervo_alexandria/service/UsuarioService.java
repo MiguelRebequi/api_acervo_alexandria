@@ -34,6 +34,10 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    private String normalizarCpf(String cpf) {
+        return cpf != null ? cpf.replaceAll("\\D", "") : null;
+    }
+
     public List<UsuarioResponseDTO> listarTodos() {
         return usuarioRepository.findByAtivoTrue().stream()
                 .map(usuario -> new UsuarioResponseDTO(
@@ -48,7 +52,9 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
-        if (usuarioRepository.existsByCpf(dto.cpf())) {
+        String cpfLimpo = normalizarCpf(dto.cpf());
+
+        if (usuarioRepository.existsByCpf(cpfLimpo)) {
             throw new RegraDeNegocioException("CPF já cadastrado no sistema.");
         }
         if (usuarioRepository.existsByEmail(dto.email())) {
@@ -93,8 +99,16 @@ public class UsuarioService {
         validarDonoOuAdmin(id);
         Usuario usuario = usuarioRepository.findByIdAndAtivoTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o ID: " + id));
+        String cpfLimpo = normalizarCpf(dto.cpf());
+        if (!cpfLimpo.equals(usuario.getCpf()) && usuarioRepository.existsByCpf(cpfLimpo)) {
+            throw new RegraDeNegocioException("CPF já cadastrado no sistema.");
+        }
+        if (!dto.email().equalsIgnoreCase(usuario.getEmail()) && usuarioRepository.existsByEmail(dto.email())) {
+            throw new RegraDeNegocioException("E-mail já cadastrado no sistema.");
+        }
+
         usuario.setNome(dto.nome());
-        usuario.setCpf(dto.cpf());
+        usuario.setCpf(cpfLimpo);
         usuario.setTelefoneFixo(dto.telefoneFixo());
         usuario.setTelefoneMovel(dto.telefoneMovel());
         usuario.setEmail(dto.email());
@@ -208,10 +222,10 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(dto.email())
                 .orElseThrow(() -> new RegraDeNegocioException(MSG_REDEFINICAO_INVALIDA));
 
-        String cpfInformado = dto.cpf() != null ? dto.cpf().replaceAll("\\D", "") : "";
-        String cpfSalvo = usuario.getCpf() != null ? usuario.getCpf().replaceAll("\\D", "") : "";
+        String cpfInformado = normalizarCpf(dto.cpf());
+        String cpfSalvo = normalizarCpf(usuario.getCpf());
 
-        if (!cpfSalvo.equals(cpfInformado)) {
+        if (cpfInformado == null || cpfInformado.isBlank() || !cpfInformado.equals(cpfSalvo)) {
             throw new RegraDeNegocioException(MSG_REDEFINICAO_INVALIDA);
         }
 
@@ -249,6 +263,7 @@ public class UsuarioService {
         }
         return u;
     }
+
 
 
 }
