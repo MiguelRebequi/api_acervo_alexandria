@@ -3,21 +3,21 @@ package com.MMR.api_acervo_alexandria.controller;
 import com.MMR.api_acervo_alexandria.dto.LoginRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.RedefinirSenhaRequestDTO;
 import com.MMR.api_acervo_alexandria.dto.TokenResponseDTO;
-import com.MMR.api_acervo_alexandria.exception.RegraDeNegocioException;
 import com.MMR.api_acervo_alexandria.model.Usuario;
-import com.MMR.api_acervo_alexandria.repository.UsuarioRepository;
+import com.MMR.api_acervo_alexandria.security.RateLimitService;
 import com.MMR.api_acervo_alexandria.security.TokenService;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import com.MMR.api_acervo_alexandria.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/login")
@@ -25,47 +25,48 @@ public class AutenticacaoController {
 
     private final AuthenticationManager manager;
     private final TokenService tokenService;
-    private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
-    public AutenticacaoController(AuthenticationManager manager, TokenService tokenService, UsuarioRepository usuarioRepository,  PasswordEncoder passwordEncoder) {
+    private final UsuarioService usuarioService;
+    private final RateLimitService rateLimitService;
+
+    public AutenticacaoController(AuthenticationManager manager,
+                                  TokenService tokenService,
+                                  UsuarioService usuarioService,
+                                  RateLimitService rateLimitService) {
         this.manager = manager;
         this.tokenService = tokenService;
-        this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.usuarioService = usuarioService;
+        this.rateLimitService = rateLimitService;
     }
 
     @PostMapping
-    public ResponseEntity<TokenResponseDTO> efetuarLogin(@RequestBody @Valid LoginRequestDTO dados) {
+    public ResponseEntity<TokenResponseDTO> efetuarLogin(@RequestBody @Valid LoginRequestDTO dados,
+                                                         HttpServletRequest request) {
+        String chave = "login:" + extrairIp(request);
+        rateLimitService.verificarLimite(chave);
+
         var authToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
+        var authentication = manager.authenticate(authToken);
 
-        manager.authenticate(authToken);
+        // Login deu certo: limpa as tentativas desse IP
+        rateLimitService.limparTentativas(chave);
 
-        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(dados.email())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
-
-        String tokenJWT = tokenService.gerarToken(usuario);
-
+        String tokenJWT = tokenService.gerarToken((Usuario) Objects.requireNonNull(authentication.getPrincipal()));
         return ResponseEntity.ok(new TokenResponseDTO(tokenJWT));
     }
 
     @PostMapping("/redefinir-senha")
-    @Transactional
-    public ResponseEntity<Void> redefinirSenha(@RequestBody @Valid RedefinirSenhaRequestDTO dados) {
-        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(dados.email())
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado para o e-mail informado."));
+    public ResponseEntity<Void> redefinirSenha(@RequestBody @Valid RedefinirSenhaRequestDTO dados,
+                                               HttpServletRequest request) {
+        rateLimitService.verificarLimite("redefinir:" + extrairIp(request));
+        usuarioService.redefinirSenha(dados);
+        return ResponseEntity.noContent().build();
+    }
 
-        // CPF será obrigatório para redefinir a senha
-        String cpfLimpo = dados.cpf().replaceAll("\\D", "");
-        if (!usuario.getCpf().equals(cpfLimpo)) {
-                throw new RegraDeNegocioException("Os dados de validação não conferem com o titular da conta.");
+    private String extrairIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
         }
-
-        // Gera o novo hash BCrypt e atualiza a credencial vinculada ao usuário
-        String novaSenhaHash = passwordEncoder.encode(dados.novaSenha());
-        usuario.getCredencial().setSenhaHash(novaSenhaHash);
-
-        usuarioRepository.save(usuario);
-
-        return ResponseEntity.noContent().build(); // Retorna 204 No Content (Sucesso)
+        return request.getRemoteAddr();
     }
 }

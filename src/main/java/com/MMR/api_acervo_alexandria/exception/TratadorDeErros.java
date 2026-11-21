@@ -63,6 +63,12 @@ public class TratadorDeErros {
                 .body("Erro interno no servidor. Tente novamente mais tarde.");
     }
 
+    // 7. Intercepta após muitos requesições
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<String> tratarErro429(TooManyRequestsException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
+    }
+
     public record DadosErroValidacao(String campo, String mensagem) {
         public DadosErroValidacao(FieldError erro) {
             this(erro.getField(), erro.getDefaultMessage());

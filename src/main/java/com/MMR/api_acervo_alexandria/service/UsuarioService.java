@@ -1,14 +1,11 @@
 package com.MMR.api_acervo_alexandria.service;
 
-import com.MMR.api_acervo_alexandria.dto.UsuarioRequestDTO;
-import com.MMR.api_acervo_alexandria.dto.UsuarioResponseDTO;
+import com.MMR.api_acervo_alexandria.dto.*;
 import com.MMR.api_acervo_alexandria.exception.RegraDeNegocioException;
 import com.MMR.api_acervo_alexandria.model.Credencial;
 import com.MMR.api_acervo_alexandria.model.Role;
 import com.MMR.api_acervo_alexandria.model.Usuario;
 import com.MMR.api_acervo_alexandria.repository.UsuarioRepository;
-import com.MMR.api_acervo_alexandria.dto.AlterarSenhaRequestDTO;
-import com.MMR.api_acervo_alexandria.dto.UsuarioPerfilUpdateDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +26,8 @@ public class UsuarioService {
 
     private static final long TAMANHO_MAXIMO_FOTO = 2 * 1024 * 1024; // 2 MB
     private static final Set<String> TIPOS_FOTO_PERMITIDOS = Set.of("image/jpeg", "image/png", "image/webp");
+    private static final String MSG_REDEFINICAO_INVALIDA =
+            "Não foi possível redefinir a senha. Verifique os dados informados.";
 
     public UsuarioService(UsuarioRepository usuarioRepository,  PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
@@ -202,6 +201,22 @@ public class UsuarioService {
 
         u.getCredencial().setSenhaHash(passwordEncoder.encode(dto.novaSenha()));
         usuarioRepository.save(u);
+    }
+
+    @Transactional
+    public void redefinirSenha(RedefinirSenhaRequestDTO dto) {
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(dto.email())
+                .orElseThrow(() -> new RegraDeNegocioException(MSG_REDEFINICAO_INVALIDA));
+
+        String cpfInformado = dto.cpf() != null ? dto.cpf().replaceAll("\\D", "") : "";
+        String cpfSalvo = usuario.getCpf() != null ? usuario.getCpf().replaceAll("\\D", "") : "";
+
+        if (!cpfSalvo.equals(cpfInformado)) {
+            throw new RegraDeNegocioException(MSG_REDEFINICAO_INVALIDA);
+        }
+
+        usuario.getCredencial().setSenhaHash(passwordEncoder.encode(dto.novaSenha()));
+        usuarioRepository.save(usuario);
     }
 
     @Transactional
