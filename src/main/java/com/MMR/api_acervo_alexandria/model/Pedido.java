@@ -102,7 +102,7 @@ public class Pedido {
         this.valorTotal = BigDecimal.ZERO;
 
         var entrega = dto.entrega();
-        this.metodoEntrega = entrega.metodo().toUpperCase();
+        this.metodoEntrega = entrega.metodo().name();
         this.destinatarioNome = (entrega.nome() + " " + entrega.sobrenome()).trim();
         this.destinatarioEmail = entrega.email();
         this.paisEntrega = entrega.pais();
@@ -114,7 +114,7 @@ public class Pedido {
         this.complementoEntrega = entrega.complemento();
         this.observacoesEntrega = entrega.observacoes();
 
-        this.metodoPagamento = dto.pagamento().metodo().toUpperCase();
+        this.metodoPagamento = dto.pagamento().metodo().name();
         this.parcelas = dto.pagamento().parcelas();
         this.cupom = (dto.cupom() != null && !dto.cupom().isBlank())
                 ? dto.cupom().trim().toUpperCase()

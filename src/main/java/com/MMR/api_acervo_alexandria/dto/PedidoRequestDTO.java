@@ -1,5 +1,7 @@
 package com.MMR.api_acervo_alexandria.dto;
 
+import com.MMR.api_acervo_alexandria.model.MetodoEntrega;
+import com.MMR.api_acervo_alexandria.model.MetodoPagamento;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
@@ -31,7 +33,7 @@ public record PedidoRequestDTO(
 
     public record EntregaRequestDTO(
             @NotBlank(message = "O método de entrega é obrigatório.")
-            String metodo,
+            MetodoEntrega metodo,
 
             @NotBlank(message = "O nome do destinatário é obrigatório.")
             String nome,
@@ -67,10 +69,11 @@ public record PedidoRequestDTO(
 
     public record PagamentoRequestDTO(
             @NotBlank(message = "O método de pagamento é obrigatório.")
-            String metodo,
+            MetodoPagamento metodo,
 
             @NotNull(message = "O número de parcelas é obrigatório.")
             @Min(value = 1, message = "Mínimo de 1 parcela.")
+            @Max(value = 4, message = "Máximo de 4 parcelas.")
             Integer parcelas
     ) {}
 }
