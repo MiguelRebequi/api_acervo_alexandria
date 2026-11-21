@@ -54,10 +54,10 @@ public class PedidoService {
         BigDecimal subtotal = BigDecimal.ZERO;
 
         if (usarItensDoJson) {
-            for (PedidoRequestDTO.ItemPedidoRequestDTO itemDto : dto.itens()) {
-                Livro livro = livroRepository.findByIdAndAtivoTrue(itemDto.livroId())
-                        .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado para o ID: " + itemDto.livroId()));
-                subtotal = processarItemPedido(pedidoSalvo, livro, itemDto.quantidade(), subtotal, itensResponse);
+            for (PedidoRequestDTO.ItemPedidoRequestDTO itemDTO : dto.itens()) {
+                Livro livro = livroRepository.findByIdAndAtivoTrueComTrava(itemDTO.livroId())
+                        .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado ou inativo: " + itemDTO.livroId()));
+                subtotal = processarItemPedido(pedidoSalvo, livro, itemDTO.quantidade(), subtotal, itensResponse);
             }
         } else {
             for (Carrinho item : itensCarrinho) {
