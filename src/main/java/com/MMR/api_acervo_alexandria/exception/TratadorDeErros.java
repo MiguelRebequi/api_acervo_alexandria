@@ -9,6 +9,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.data.core.PropertyReferenceException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +70,24 @@ public class TratadorDeErros {
     @ExceptionHandler(TooManyRequestsException.class)
     public ResponseEntity<String> tratarErro429(TooManyRequestsException ex) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
+    }
+
+    // 8. JSON errôneo baseado no formato mínimo
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> tratarErroJsonMalformado(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body("Corpo da requisição ausente ou com formato JSON inválido.");
+    }
+
+    // 9. Parâmetro inválido
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> tratarErroTipoParametro(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body("Parâmetro '" + ex.getName() + "' possui um valor ou tipo inválido.");
+    }
+
+    // 10. Ordernação diferente do padrão
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<String> tratarErroOrdenacaoInvalida(PropertyReferenceException ex) {
+        return ResponseEntity.badRequest().body("Campo de ordenação inválido: '" + ex.getPropertyName() + "'.");
     }
 
     public record DadosErroValidacao(String campo, String mensagem) {
