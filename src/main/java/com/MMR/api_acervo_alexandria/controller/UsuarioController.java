@@ -63,7 +63,7 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping
+    @PatchMapping("/{id}/promover-admin")
     public ResponseEntity<Void> promoverParaAdmin(@PathVariable Long id){
         usuarioService.promoverParaAdmin(id);
         return ResponseEntity.noContent().build();
