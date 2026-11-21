@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class UsuarioService {
@@ -25,7 +24,6 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
 
     private static final long TAMANHO_MAXIMO_FOTO = 2 * 1024 * 1024; // 2 MB
-    private static final Set<String> TIPOS_FOTO_PERMITIDOS = Set.of("image/jpeg", "image/png", "image/webp");
     private static final String MSG_REDEFINICAO_INVALIDA =
             "Não foi possível redefinir a senha. Verifique os dados informados.";
 
@@ -241,19 +239,46 @@ public class UsuarioService {
         if (arquivo.getSize() > TAMANHO_MAXIMO_FOTO) {
             throw new RegraDeNegocioException("A imagem deve ter no máximo 2 MB.");
         }
-        String contentType = arquivo.getContentType();
-        if (contentType == null || !TIPOS_FOTO_PERMITIDOS.contains(contentType)) {
-            throw new RegraDeNegocioException("Formato inválido. Envie apenas JPG, PNG ou WebP.");
-        }
 
-        Usuario u = buscarUsuarioPorEmail(email);
         try {
-            u.setFoto(arquivo.getBytes());
-            u.setFotoTipo(contentType);
+            byte[] bytes = arquivo.getBytes();
+            String tipoReal = detectarTipoImagem(bytes);
+            if (tipoReal == null) {
+                throw new RegraDeNegocioException("Arquivo inválido. Envie uma imagem real nos formatos JPG, PNG ou WebP.");
+            }
+
+            Usuario u = buscarUsuarioPorEmail(email);
+            u.setFoto(bytes);
+            u.setFotoTipo(tipoReal);
             usuarioRepository.save(u);
         } catch (IOException e) {
             throw new RegraDeNegocioException("Não foi possível processar o arquivo enviado.");
         }
+    }
+
+    private String detectarTipoImagem(byte[] bytes) {
+        if (bytes == null || bytes.length < 12) {
+            return null;
+        }
+
+        // JPEG: FF D8 FF
+        if ((bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xD8 && (bytes[2] & 0xFF) == 0xFF) {
+            return "image/jpeg";
+        }
+
+        // PNG: 89 50 4E 47 0D 0A 1A 0A
+        if ((bytes[0] & 0xFF) == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47
+                && bytes[4] == 0x0D && bytes[5] == 0x0A && bytes[6] == 0x1A && bytes[7] == 0x0A) {
+            return "image/png";
+        }
+
+        // WebP: RIFF....WEBP
+        if (bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F'
+                && bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P') {
+            return "image/webp";
+        }
+
+        return null;
     }
 
     public Usuario buscarEntidadeComFoto(String email) {
