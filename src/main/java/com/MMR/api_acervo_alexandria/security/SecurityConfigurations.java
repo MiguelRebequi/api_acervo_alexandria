@@ -56,8 +56,12 @@ public class SecurityConfigurations {
                     req.requestMatchers(HttpMethod.GET, "/pedidos/status-disponiveis").permitAll(); // Auxiliar do front-end
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll(); // Swagger UI
 
+                    // Rotas do próprio usuário autenticado (declaradas antes de /usuarios/*)
+                    req.requestMatchers("/usuarios/me", "/usuarios/me/**").authenticated();
+
                     // 2. Rotas Exclusivas de Administração (Gerenciamento de Estoque)
                     req.requestMatchers(HttpMethod.GET, "/usuarios").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PUT, "/usuarios/*").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.PATCH, "/usuarios/*/promover-admin").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.PUT, "/pedidos/*/status").hasRole("ADMIN");
                     req.requestMatchers(HttpMethod.POST, "/livros").hasRole("ADMIN");
