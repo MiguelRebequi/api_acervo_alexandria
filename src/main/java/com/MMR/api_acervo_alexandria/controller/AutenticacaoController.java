@@ -63,10 +63,8 @@ public class AutenticacaoController {
     }
 
     private String extrairIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
+        // Com server.forward-headers-strategy=native o Tomcat já troca o remoteAddr pelo IP real do cliente.
+        // Não confie em X-Forwarded-For lido à mão: o cliente consegue forjar esse cabeçalho.
         return request.getRemoteAddr();
     }
 }
