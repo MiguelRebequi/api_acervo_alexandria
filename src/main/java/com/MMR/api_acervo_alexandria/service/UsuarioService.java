@@ -181,6 +181,11 @@ public class UsuarioService {
                 .orElseThrow(() -> new EntityNotFoundException("Usuário autenticado não encontrado."));
     }
 
+    /** Entidade do usuário ativo pelo e-mail (usada para gerar o token no login). */
+    public Usuario buscarEntidadePorEmail(String email) {
+        return buscarUsuarioPorEmail(email);
+    }
+
     public UsuarioResponseDTO buscarPerfil(String email) {
         Usuario u = buscarUsuarioPorEmail(email);
         return new UsuarioResponseDTO(
