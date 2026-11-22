@@ -40,14 +40,16 @@ public class AutenticacaoController {
     @PostMapping
     public ResponseEntity<TokenResponseDTO> efetuarLogin(@RequestBody @Valid LoginRequestDTO dados,
                                                          HttpServletRequest request) {
-        String chave = "login:" + extrairIp(request);
-        rateLimitService.verificarLimite(chave);
+        String ip = extrairIp(request);
+        String chaveConta = "login:" + ip + ":" + dados.email().trim().toLowerCase();
+        rateLimitService.verificarLimite("login-ip:" + ip, 50); // freio geral por IP (nunca zera no acerto)
+        rateLimitService.verificarLimite(chaveConta, 5);        // tentativas contra uma mesma conta
 
         var authToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
         var authentication = manager.authenticate(authToken);
 
-        // Login deu certo: limpa as tentativas desse IP
-        rateLimitService.limparTentativas(chave);
+        // Login deu certo: limpa só as tentativas dessa conta (o freio geral do IP continua)
+        rateLimitService.limparTentativas(chaveConta);
 
         Usuario usuario = usuarioService.buscarEntidadePorEmail(authentication.getName());
         String tokenJWT = tokenService.gerarToken(usuario);

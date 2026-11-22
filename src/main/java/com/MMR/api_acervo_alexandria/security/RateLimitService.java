@@ -17,6 +17,10 @@ public class RateLimitService {
     private final ConcurrentHashMap<String, Deque<Instant>> tentativas = new ConcurrentHashMap<>();
 
     public void verificarLimite(String chave) {
+        verificarLimite(chave, MAX_TENTATIVAS);
+    }
+
+    public void verificarLimite(String chave, int maxTentativas) {
         Instant agora = Instant.now();
         Instant limiteJanela = agora.minusSeconds(JANELA_SEGUNDOS);
 
@@ -27,7 +31,7 @@ public class RateLimitService {
                 historico.pollFirst();
             }
 
-            if (historico.size() >= MAX_TENTATIVAS) {
+            if (historico.size() >= maxTentativas) {
                 throw new TooManyRequestsException("Muitas tentativas seguidas. Aguarde 15 minutos e tente novamente.");
             }
 
