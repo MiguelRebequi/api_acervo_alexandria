@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import java.util.Comparator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -48,6 +49,10 @@ public class PedidoService {
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado ou inativo."));
 
         String cupomValidado = validarENormalizarCupom(dto.cupom());
+        if ("BEMVINDO20".equals(cupomValidado)
+                && pedidoRepository.existsByUsuarioIdAndCupom(usuario.getId(), "BEMVINDO20")) {
+            throw new RegraDeNegocioException("O cupom BEMVINDO20 só pode ser usado uma vez.");
+        }
 
         boolean usarItensDoJson = dto.itens() != null && !dto.itens().isEmpty();
         List<Carrinho> itensCarrinho = carrinhoRepository.findByUsuarioId(usuario.getId());
@@ -64,13 +69,19 @@ public class PedidoService {
         BigDecimal subtotal = BigDecimal.ZERO;
 
         if (usarItensDoJson) {
-            for (PedidoRequestDTO.ItemPedidoRequestDTO itemDTO : dto.itens()) {
+            List<PedidoRequestDTO.ItemPedidoRequestDTO> itensOrdenados = dto.itens().stream()
+                    .sorted(Comparator.comparing(PedidoRequestDTO.ItemPedidoRequestDTO::livroId))
+                    .toList();
+            for (PedidoRequestDTO.ItemPedidoRequestDTO itemDTO : itensOrdenados) {
                 Livro livro = livroRepository.findByIdAndAtivoTrueComTrava(itemDTO.livroId())
                         .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado ou inativo: " + itemDTO.livroId()));
                 subtotal = processarItemPedido(pedidoSalvo, livro, itemDTO.quantidade(), subtotal, itensResponse);
             }
         } else {
-            for (Carrinho item : itensCarrinho) {
+            List<Carrinho> carrinhoOrdenado = itensCarrinho.stream()
+                    .sorted(Comparator.comparing(c -> c.getLivro().getId()))
+                    .toList();
+            for (Carrinho item : carrinhoOrdenado) {
                 Livro livro = livroRepository.findByIdAndAtivoTrueComTrava(item.getLivro().getId())
                         .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado ou inativo: " + item.getLivro().getId()));
                 subtotal = processarItemPedido(pedidoSalvo, livro, item.getQuantidade(), subtotal, itensResponse);
@@ -89,7 +100,7 @@ public class PedidoService {
             ajustePagamento = totalBase.multiply(new BigDecimal("0.02")).setScale(2, RoundingMode.HALF_UP);
         }
 
-        BigDecimal valorDescontoTotal = descontoCupom.subtract(ajustePagamento).max(BigDecimal.ZERO);
+        BigDecimal valorDescontoTotal = descontoCupom.add(ajustePagamento.min(BigDecimal.ZERO).negate());
         BigDecimal valorTotal = totalBase.add(ajustePagamento).max(BigDecimal.ZERO);
 
         pedidoSalvo.setSubtotal(subtotal);
