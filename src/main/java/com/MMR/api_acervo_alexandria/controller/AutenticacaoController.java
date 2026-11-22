@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/login")
@@ -50,7 +49,8 @@ public class AutenticacaoController {
         // Login deu certo: limpa as tentativas desse IP
         rateLimitService.limparTentativas(chave);
 
-        String tokenJWT = tokenService.gerarToken((Usuario) Objects.requireNonNull(authentication.getPrincipal()));
+        Usuario usuario = usuarioService.buscarEntidadePorEmail(authentication.getName());
+        String tokenJWT = tokenService.gerarToken(usuario);
         return ResponseEntity.ok(new TokenResponseDTO(tokenJWT));
     }
 
@@ -63,10 +63,8 @@ public class AutenticacaoController {
     }
 
     private String extrairIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
+        // Com server.forward-headers-strategy=native o Tomcat já troca o remoteAddr pelo IP real do cliente.
+        // Não confie em X-Forwarded-For lido à mão: o cliente consegue forjar esse cabeçalho.
         return request.getRemoteAddr();
     }
 }

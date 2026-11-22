@@ -32,7 +32,7 @@ public record PedidoRequestDTO(
     ) {}
 
     public record EntregaRequestDTO(
-            @NotBlank(message = "O método de entrega é obrigatório.")
+            @NotNull(message = "O método de entrega é obrigatório.")
             MetodoEntrega metodo,
 
             @NotBlank(message = "O nome do destinatário é obrigatório.")
@@ -68,7 +68,7 @@ public record PedidoRequestDTO(
     ) {}
 
     public record PagamentoRequestDTO(
-            @NotBlank(message = "O método de pagamento é obrigatório.")
+            @NotNull(message = "O método de pagamento é obrigatório.")
             MetodoPagamento metodo,
 
             @NotNull(message = "O número de parcelas é obrigatório.")
